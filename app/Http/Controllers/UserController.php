@@ -47,7 +47,7 @@ class UserController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Usuário cadastrado cm sucesso',
+                'message' => 'Usuário cadastrado com sucesso',
                 'data' => $user
             ], Response::HTTP_CREATED);
 
