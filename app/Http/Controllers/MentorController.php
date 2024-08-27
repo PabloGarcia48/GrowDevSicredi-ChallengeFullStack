@@ -3,24 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mentor;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 class MentorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $mentors = Mentor::all();
         return $mentors;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         try {
@@ -60,27 +56,71 @@ class MentorController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Mentor $mentor)
+    public function show(int $id)
     {
-        //
+        try {
+            $mentor = Mentor::findOrFail($id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Mentor encontrado',
+                'data' => $mentor
+                ], Response::HTTP_OK);
+        } catch(ModelNotFoundException $error){
+            return response()->json([
+                'success' => false,
+                'message' => 'ID do mentor, não encontrado'
+            ], Response::HTTP_NOT_FOUND);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Mentor $mentor)
+    public function update(Request $request, Int $id)
     {
-        //
+        try{
+            $request->validate([
+                [
+                    'name' => 'required|string',
+                    'email' => 'required|email'
+                ],
+                [
+                    'required' => 'O campo :attribute é obrigatório',
+                    'string' => 'O campo :attribute precisa ser uma string',
+                    'email' => 'O campo :attribute precisa ser um email válido'
+                ]
+                ]);
+
+            $mentor = Mentor::findOrFail($id);
+
+            $mentor->fill([
+                'name' => $request->name,
+                'email' => $request->email
+            ]);
+
+            $mentor->save();
+
+            return response()->json(['success' => true,
+            'message' => "Mentor editado!",
+            'data' => $mentor
+        ], Response::HTTP_OK);
+
+        }catch(\Exception $error){
+            return response()->json(['success' => false, 'msg' => $error->getMessage()], 400);
+         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Mentor $mentor)
+    public function destroy(Int $id)
     {
-        //
+        try{
+            $mentor = Mentor::findOrFail($id);
+
+            $mentor->delete();
+
+            return response()->json(['success' => true, 'mgs' => "Mentor excluido com sucesso!"]);
+
+        } catch(ModelNotFoundException $error){
+            return response()->json([
+                'success' => false,
+                'message' => 'ID do mentor, não encontrado'
+            ], Response::HTTP_NOT_FOUND);
+        }
     }
 }
