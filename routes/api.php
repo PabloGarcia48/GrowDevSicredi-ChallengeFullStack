@@ -29,3 +29,5 @@ Route::apiResource('/auth', AuthController::class);
 
 
 Route::apiResource('/mentors', MentorController::class)->middleware(['auth:sanctum', 'admin']);
+
+// Route::apiResource('/mentors', MentorController::class);
